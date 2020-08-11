@@ -42,25 +42,7 @@ fn main() {
         .build();
 
     // Draw screen
-    while !tcod.root.window_closed() {
-        tcod.root.set_default_foreground(WHITE);
-        tcod.root.clear();
-
-        {
-            // Draw all the entities
-            let mut positions = &entities.read_storage::<Position>();
-            let mut renderables = &entities.read_storage::<Renderable>();
-
-            for (pos, render) in (positions, renderables).join() {
-                tcod.root.put_char_ex(pos.x, pos.y, render.glyph, render.fg, render.bg);
-            }
-        }
-        tcod.root.flush();
-        let x = handle_keys(&mut tcod, &mut entities);
-        if x {
-            break;
-        }
-
+    while !tcod.render(&mut entities) {
         entities.maintain();
     }
 }
@@ -82,12 +64,12 @@ fn handle_keys(tcod: &mut Ui, ecs: &mut World) -> bool {
             Player::move_player(ecs, 1, 0)
         },
         KeyCode::Escape => {
-            return true
+            return false
         },
 
         _ => {}
     }
 
-    false
+    true
 
 }
