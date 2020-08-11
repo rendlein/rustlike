@@ -1,10 +1,15 @@
+mod ui;
+use ui::Ui;
+mod components;
+use components::{Player, Position, Renderable};
 mod config;
+use crate::config::CONFIG;
 mod map;
-mod player;
-use player::Player;
 
 #[macro_use]
 extern crate serde_derive;
+#[macro_use]
+extern crate lazy_static;
 
 use tcod::colors::*;
 use tcod::console::*;
@@ -14,40 +19,20 @@ use specs::prelude::*;
 use specs_derive::Component;
 use std::convert::TryInto;
 
-struct Tcod {
-    root: Root,
-}
-
-#[derive(Component, Debug)]
-struct Renderable {
-    glyph: char,
-    fg: Color,
-    bg: Color,
-}
 
 fn main() {
+    let mut tcod = Ui::new();
     let mut entities = World::new();
 
-    let configuration = crate::config::Configuration::new();
-    // Set up the console.
-    let root = Root::initializer()
-        .font(configuration.font, FontLayout::Tcod)
-        .font_type(FontType::Greyscale)
-        .size(configuration.width, configuration.height)
-        .title("Rustlike")
-        .init();
-
-    let mut tcod = Tcod { root };
-
     // Add components to ECS
-    entities.register::<map::Position>();
+    entities.register::<Position>();
     entities.register::<Renderable>();
-    entities.register::<player::Player>();
+    entities.register::<Player>();
 
     // Create the Player Entity
     entities
         .create_entity()
-        .with(map::Position { x: configuration.width / 2, y: configuration.height / 2 })
+        .with(Position { x: CONFIG.width / 2, y: CONFIG.height / 2 })
         .with(Renderable {
             glyph: '@',
             fg: YELLOW,
@@ -62,49 +47,41 @@ fn main() {
         tcod.root.clear();
 
         {
-            println!("SHOULD BE DRAWING @");
             // Draw all the entities
-            let mut positions = &entities.read_storage::<map::Position>();
+            let mut positions = &entities.read_storage::<Position>();
             let mut renderables = &entities.read_storage::<Renderable>();
 
             for (pos, render) in (positions, renderables).join() {
-                println!("{:?} -> {:?}", pos, render);
                 tcod.root.put_char_ex(pos.x, pos.y, render.glyph, render.fg, render.bg);
             }
         }
+        tcod.root.flush();
         let x = handle_keys(&mut tcod, &mut entities);
         if x {
             break;
         }
 
-        tcod.root.flush();
         entities.maintain();
     }
 }
 
-fn handle_keys(tcod: &mut Tcod, ecs: &mut World) -> bool {
-    println!("Waiting for keypress");
+fn handle_keys(tcod: &mut Ui, ecs: &mut World) -> bool {
     let key = tcod.root.wait_for_keypress(true);
 
     match key.code {
         KeyCode::Up => {
-            println!("UP");
             Player::move_player(ecs, 0, -1)
         },
         KeyCode::Down => {
-            println!("Down");
             Player::move_player(ecs, 0, 1)
         },
         KeyCode::Left => {
-            println!("Left");
             Player::move_player(ecs, -1, 0)
         },
         KeyCode::Right => {
-            println!("Right");
             Player::move_player(ecs, 1, 0)
         },
         KeyCode::Escape => {
-            println!("Exiting");
             return true
         },
 

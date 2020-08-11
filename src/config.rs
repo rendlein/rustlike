@@ -1,10 +1,16 @@
 extern crate config;
 
+use std::sync::Mutex;
+
 #[derive(Debug, Deserialize)]
 pub struct Configuration {
     pub width: i32,
     pub height: i32,
     pub font: String,
+}
+
+lazy_static! {
+    pub static ref CONFIG: Configuration = Configuration::new();
 }
 
 impl Configuration {
