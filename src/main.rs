@@ -12,12 +12,8 @@ extern crate serde_derive;
 extern crate lazy_static;
 
 use tcod::colors::*;
-use tcod::console::*;
 use tcod::input::*;
-use std::collections::HashMap;
 use specs::prelude::*;
-use specs_derive::Component;
-use std::convert::TryInto;
 
 
 fn main() {

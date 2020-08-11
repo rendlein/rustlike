@@ -1,7 +1,5 @@
 extern crate config;
 
-use std::sync::Mutex;
-
 #[derive(Debug, Deserialize)]
 pub struct Configuration {
     pub width: i32,

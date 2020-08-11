@@ -34,8 +34,8 @@ impl Ui {
 
         {
             // Draw all the entities
-            let mut positions = &entities.read_storage::<Position>();
-            let mut renderables = &entities.read_storage::<Renderable>();
+            let positions = &entities.read_storage::<Position>();
+            let renderables = &entities.read_storage::<Renderable>();
 
             for (pos, render) in (positions, renderables).join() {
                 self.con.put_char_ex(pos.x, pos.y, render.glyph, render.fg, render.bg);
